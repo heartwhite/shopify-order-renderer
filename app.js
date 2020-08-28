@@ -8,6 +8,7 @@ const fs = require('fs');
 const xlsx = require('xlsx');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+const Shopify = require('shopify-api-node');
 
 var app = express();
 
@@ -16,8 +17,32 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(bodyParser.json());
 
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  next();
+});
 app.use(express.static(path.join(__dirname, 'build')));
 
+app.post('/orders', async (req, res) => {
+  const shopify = new Shopify({
+    shopName: 'roodkappje',
+    apiKey: 'bda8585c9ca92583150cf1115a14b392',
+    password: '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',
+  });
+  const compDate = (date) => {
+    // let nDate = date.replace('T15', 'T16');
+    return `${date}-04:00`;
+  };
+  const data = await shopify.order.list({
+    status: 'any',
+    limit: 60,
+    processed_at_min: compDate(req.body.startDate),
+    processed_at_max: compDate(req.body.endDate),
+    fields: 'name, created_at, line_items, shipping_lines, fulfillment_status',
+  });
+  res.send(data);
+});
 app.post('/upload', (req, res) => {
   // app.use(express.static('public'));
   const newWB = xlsx.utils.book_new();
