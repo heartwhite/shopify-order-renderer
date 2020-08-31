@@ -25,10 +25,11 @@ app.use(function (req, res, next) {
 app.use(express.static(path.join(__dirname, 'build')));
 
 app.post('/orders', async (req, res) => {
+  const { shopName, apiKey, password, startDate, endDate } = req.body;
   const shopify = new Shopify({
-    shopName: 'roodkappje',
-    apiKey: 'bda8585c9ca92583150cf1115a14b392',
-    password: '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',
+    shopName: shopName,
+    apiKey: apiKey,
+    password: password,
   });
   const compDate = (date) => {
     // let nDate = date.replace('T15', 'T16');
@@ -37,8 +38,8 @@ app.post('/orders', async (req, res) => {
   const data = await shopify.order.list({
     status: 'any',
     limit: 60,
-    processed_at_min: compDate(req.body.startDate),
-    processed_at_max: compDate(req.body.endDate),
+    processed_at_min: compDate(startDate),
+    processed_at_max: compDate(endDate),
     fields: 'name, created_at, line_items, shipping_lines, fulfillment_status',
   });
   res.send(data);
