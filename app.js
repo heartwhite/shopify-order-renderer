@@ -32,7 +32,6 @@ app.post('/orders', async (req, res) => {
     password: password,
   });
   const compDate = (date) => {
-    // let nDate = date.replace('T15', 'T16');
     return `${date}-04:00`;
   };
   const data = await shopify.order.list({
